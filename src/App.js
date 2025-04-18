@@ -8,23 +8,22 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Fetch character data when charname changes
   useEffect(() => {
-    // เรียก API จาก Render ที่ถูก deploy แล้ว
-    setLoading(true); // เริ่มโหลดข้อมูล
-    axios.post('https://updatedata-10e9.onrender.com/character/get', {
-      charname: charname
-    })
-    .then(response => {
-      setCharacterData(response.data);
-      setLoading(false); // หยุดโหลดข้อมูล
-    })
-    .catch(error => {
-      console.error('Error fetching character data:', error);
-      setError('Failed to fetch character data');
-      setLoading(false); // หยุดโหลดข้อมูล
-    });
+    setLoading(true); // Start loading
+    axios.post('https://updatedata-10e9.onrender.com/character/get', { charname: charname })
+      .then(response => {
+        setCharacterData(response.data); // Set character data
+        setLoading(false); // Stop loading
+      })
+      .catch(error => {
+        console.error('Error fetching character data:', error.response || error);
+        setError('Failed to fetch character data');
+        setLoading(false); // Stop loading
+      });
   }, [charname]);
 
+  // Update character data
   const updateCharacter = () => {
     const newCharacterData = {
       charname: charname,
@@ -36,16 +35,16 @@ function App() {
       }
     };
 
-    setLoading(true); // เริ่มโหลดเมื่อมีการอัปเดต
+    setLoading(true); // Start loading for update
     axios.post('https://updatedata-10e9.onrender.com/character/update', newCharacterData)
       .then(response => {
         alert('Character updated successfully!');
-        setLoading(false); // หยุดโหลดข้อมูล
+        setLoading(false); // Stop loading
       })
       .catch(error => {
-        console.error('Error updating character:', error);
+        console.error('Error updating character:', error.response || error);
         alert('Failed to update character');
-        setLoading(false); // หยุดโหลดข้อมูล
+        setLoading(false); // Stop loading
       });
   };
 
@@ -74,7 +73,7 @@ function App() {
           <p><strong>Level:</strong> {characterData.data.lv}</p>
           <p><strong>EXP:</strong> {characterData.data.exp}</p>
           <p><strong>Strength:</strong> {characterData.data.str}</p>
-          {/* เพิ่มข้อมูลที่ต้องการแสดงที่นี่ */}
+          {/* Add additional character data display here */}
         </div>
       ) : (
         <p>No character data available.</p>
