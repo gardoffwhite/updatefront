@@ -5,25 +5,29 @@ import './App.css';
 function App() {
   const [characterData, setCharacterData] = useState(null);
   const [charname, setCharname] = useState("GmEvent");
+  const [newCharname, setNewCharname] = useState("");  // สำหรับชื่อใหม่
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch character data when charname changes
+  // การโหลดข้อมูลตัวละครจาก API
   useEffect(() => {
-    setLoading(true); // Start loading
-    axios.post('https://updatedata-10e9.onrender.com/character/get', { charname: charname })
+    if (!charname) return;  // ไม่ให้ทำการค้นหาถ้าไม่มีชื่อ
+    setLoading(true);
+    axios.post('https://updatedata-10e9.onrender.com/character/get', {
+      charname: charname
+    })
       .then(response => {
-        setCharacterData(response.data); // Set character data
-        setLoading(false); // Stop loading
+        setCharacterData(response.data);
+        setLoading(false);
       })
       .catch(error => {
-        console.error('Error fetching character data:', error.response || error);
+        console.error('Error fetching character data:', error);
         setError('Failed to fetch character data');
-        setLoading(false); // Stop loading
+        setLoading(false);
       });
   }, [charname]);
 
-  // Update character data
+  // การอัปเดตข้อมูลตัวละคร
   const updateCharacter = () => {
     const newCharacterData = {
       charname: charname,
@@ -35,36 +39,46 @@ function App() {
       }
     };
 
-    setLoading(true); // Start loading for update
+    setLoading(true);
     axios.post('https://updatedata-10e9.onrender.com/character/update', newCharacterData)
       .then(response => {
         alert('Character updated successfully!');
-        setLoading(false); // Stop loading
+        setLoading(false);
       })
       .catch(error => {
-        console.error('Error updating character:', error.response || error);
+        console.error('Error updating character:', error);
         alert('Failed to update character');
-        setLoading(false); // Stop loading
+        setLoading(false);
       });
+  };
+
+  // การเปลี่ยนชื่อและค้นหาตัวละครใหม่
+  const searchCharacterByName = () => {
+    if (newCharname) {
+      setCharname(newCharname);  // เปลี่ยนชื่อใหม่เพื่อค้นหา
+      setNewCharname("");  // รีเซ็ตช่องกรอกชื่อใหม่
+    }
   };
 
   return (
     <div className="App">
       <h1>Character Data</h1>
+
+      {/* ช่องกรอกชื่อใหม่เพื่อค้นหาตัวละคร */}
       <div>
         <input 
           type="text" 
-          value={charname} 
-          onChange={(e) => setCharname(e.target.value)} 
-          placeholder="Enter character name"
+          value={newCharname} 
+          onChange={(e) => setNewCharname(e.target.value)} 
+          placeholder="Enter new character name"
         />
-        <button onClick={updateCharacter} disabled={loading}>
-          {loading ? "Updating..." : "Update Character"}
+        <button onClick={searchCharacterByName} disabled={loading}>
+          Search for New Character
         </button>
       </div>
 
+      {/* แสดงข้อมูลตัวละคร */}
       {error && <p style={{ color: 'red' }}>{error}</p>}
-
       {loading ? (
         <p>Loading character data...</p>
       ) : characterData ? (
@@ -73,11 +87,16 @@ function App() {
           <p><strong>Level:</strong> {characterData.data.lv}</p>
           <p><strong>EXP:</strong> {characterData.data.exp}</p>
           <p><strong>Strength:</strong> {characterData.data.str}</p>
-          {/* Add additional character data display here */}
+          {/* เพิ่มข้อมูลที่ต้องการแสดง */}
         </div>
       ) : (
         <p>No character data available.</p>
       )}
+
+      {/* ปุ่มอัปเดตตัวละคร */}
+      <button onClick={updateCharacter} disabled={loading}>
+        {loading ? "Updating..." : "Update Character"}
+      </button>
     </div>
   );
 }
